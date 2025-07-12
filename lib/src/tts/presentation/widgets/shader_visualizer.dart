@@ -33,8 +33,7 @@ class _ShaderVisualizerState extends State<ShaderVisualizer> {
   }
 
   Future<void> _loadShader() async {
-    final program =
-        await FragmentProgram.fromAsset('shaders/visualizer.frag');
+    final program = await FragmentProgram.fromAsset('shaders/visualizer.frag');
     _shader = program.fragmentShader();
     setState(() {
       // Shader is loaded, trigger a repaint
@@ -61,9 +60,10 @@ class ShaderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    shader..setFloat(0, size.width)
-    ..setFloat(1, size.height)
-    ..setFloat(2, time);
+    shader
+      ..setFloat(0, size.width)
+      ..setFloat(1, size.height)
+      ..setFloat(2, time);
 
     final paint = Paint()..shader = shader;
     canvas.drawRect(
