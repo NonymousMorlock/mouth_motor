@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:motor_mouth/counter/counter.dart';
 import 'package:motor_mouth/l10n/l10n.dart';
 import 'package:motor_mouth/src/tts/presentation/views/home_view.dart';
 
