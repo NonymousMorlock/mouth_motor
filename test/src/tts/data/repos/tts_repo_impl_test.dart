@@ -121,4 +121,69 @@ void main() {
       },
     );
   });
+
+  group('fetchAudio', () {
+    final tResponse = Uint8List(1);
+    test(
+      'Should return [Right<Uint8List?>] when remote call is successful',
+      () async {
+        when(
+          () => remoteDataSrc.fetchAudio(any()),
+        ).thenAnswer((_) async => tResponse);
+
+        when(
+          () => guard(any<Future<Uint8List?> Function()>()),
+        ).thenAnswer((invocation) async {
+          final fn =
+              invocation.positionalArguments[0]
+                  as Future<Uint8List?> Function();
+          return Right(await fn());
+        });
+
+        final result = await repoImpl.fetchAudio(tJobId);
+
+        expect(result, Right<Failure, Uint8List>(tResponse));
+
+        verify(() => remoteDataSrc.fetchAudio(tJobId)).called(1);
+        verify(() => guard(any<Future<Uint8List?> Function()>())).called(1);
+
+        verifyNoMoreInteractions(remoteDataSrc);
+        verifyNoMoreInteractions(guard);
+      },
+    );
+
+    test(
+      'Should return [Left<ServerFailure>] when remote call throws '
+      '[ServerException]',
+      () async {
+        when(() => remoteDataSrc.fetchAudio(any())).thenThrow(tServerException);
+
+        when(
+          () => guard(any<Future<Uint8List?> Function()>()),
+        ).thenAnswer((invocation) async {
+          final fn =
+              invocation.positionalArguments[0]
+                  as Future<Uint8List?> Function();
+
+          try {
+            await fn();
+            // it'll not get here, if it does, surprise surprise
+            return const Right(null);
+          } on ServerException catch (exception) {
+            return Left(ServerFailure.fromException(exception));
+          }
+        });
+
+        final result = await repoImpl.fetchAudio(tJobId);
+
+        expect(result, Left<Failure, Uint8List?>(tServerFailure));
+
+        verify(() => remoteDataSrc.fetchAudio(tJobId)).called(1);
+        verify(() => guard(any<Future<Uint8List?> Function()>())).called(1);
+
+        verifyNoMoreInteractions(remoteDataSrc);
+        verifyNoMoreInteractions(guard);
+      },
+    );
+  });
 }
