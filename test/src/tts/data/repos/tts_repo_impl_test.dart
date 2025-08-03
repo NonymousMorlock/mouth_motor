@@ -186,4 +186,59 @@ void main() {
       },
     );
   });
+
+  group('fetchSpeakers', () {
+    const tResponse = ['Test String'];
+    test(
+      'Should return [Right<List<String>>] when remote call is successful',
+      () async {
+        when(
+          () => remoteDataSrc.fetchSpeakers(),
+        ).thenAnswer((_) async => tResponse);
+
+        when(() => guard(any<Future<List<String>> Function()>())).thenAnswer((
+          invocation,
+        ) async {
+          final fn =
+              invocation.positionalArguments[0]
+                  as Future<List<String>> Function();
+
+          return Right(await fn());
+        });
+
+        final result = await repoImpl.fetchSpeakers();
+
+        expect(result, const Right<Failure, List<String>>(tResponse));
+
+        verify(() => remoteDataSrc.fetchSpeakers()).called(1);
+        verify(() => guard(any<Future<List<String>> Function()>())).called(1);
+
+        verifyNoMoreInteractions(remoteDataSrc);
+        verifyNoMoreInteractions(guard);
+      },
+    );
+
+    test(
+      'Should return [Left<ServerFailure>] when remote call throws '
+      '[ServerException]',
+      () async {
+        when(() => remoteDataSrc.fetchSpeakers()).thenThrow(tServerException);
+
+        when(
+          () => guard(any<Future<List<String>> Function()>()),
+        ).thenAnswer((invocation) async {
+          final fn =
+              invocation.positionalArguments[0]
+                  as Future<List<String>> Function();
+
+          try {
+            await fn();
+            return const Right(tResponse);
+          } on ServerException catch (exception) {
+            return Left(ServerFailure.fromException(exception));
+          }
+        });
+      },
+    );
+  });
 }
