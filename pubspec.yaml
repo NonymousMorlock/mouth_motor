@@ -22,7 +22,7 @@ dependencies:
   flutter_soloud: ^4.1.7
   get_it: ^9.2.1
   http: ^1.6.0
-  intl: ^0.20.2
+  intl: ^0.20.3
   provider: ^6.1.5
 
 dev_dependencies:
